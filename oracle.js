@@ -53,7 +53,7 @@ const abi = [
 	}
 ];
 
-const contractAddress = "0x3F1acf630259fAb365c61bbF8eA3390d6B1b45a8";
+const contractAddress = "0x7147B5b40dE493c024CE9c327832e0cFc2f67D4B";
 const sampleContract = new web3.eth.Contract(abi, contractAddress);
 
 
