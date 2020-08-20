@@ -16,7 +16,7 @@ const fetch = require('node-fetch'); //To fetch APIs
 const signedTxs = [];
 let nonce;
 
-//contract abi - the below is for the sample contract.
+// contract abi - the below is for the sample contract.
 const abi =[
 	{
 		"constant": false,
@@ -83,9 +83,8 @@ const contractAddress = "0x2d70C16B9249AE8755740E2364D599b3BE6aaF36";
 // const contractAddress = "0x3F1acf630259fAb365c61bbF8eA3390d6B1b45a8";
 const sampleContract = new web3.eth.Contract(abi, contractAddress);
 
-//Example Oracle sets number from the api below - gas price on mainnet.
+// Example Oracle sets number from the api below - gas price on mainnet.
 async function main() {
-
   let gasReq = await fetch('https://ethgasstation.info/json/ethgasAPI.json');
   let gasInfo = await gasReq.json();
   let gasAvg = await (gasInfo.average);
@@ -98,14 +97,14 @@ async function main() {
 	console.log("Avg gas price",gasAvg);
 }
 
-//function sending the transaction from our configured wallet (the private key we provided)
+// function sending the transaction from our configured wallet (the private key we provided)
 async function sendTx(txObject) {
   const txTo = contractAddress;
-  const txData = txObject.encodeABI(); //txObject was set in main funtion
+  const txData = txObject.encodeABI(); // txObject was set in main funtion
   const txFrom = account.address;
   const txKey = account.privateKey;
-  const gasPrice = (5*(10**9)); //5 gwei gas price
-  const gasLimit = await txObject.estimateGas(); //estimated gas cost of trnsaction
+  const gasPrice = (5*(10**9)); // 5 gwei gas price
+  const gasLimit = await txObject.estimateGas(); // estimated gas cost of trnsaction
 
   const tx = {
     from : txFrom,
@@ -115,7 +114,7 @@ async function sendTx(txObject) {
     gas : gasLimit, gasPrice
   };
 
-  //sign the transaction
+  // sign the transaction
   const signedTx = await web3.eth.accounts.signTransaction(tx, txKey);
   nonce++;
 
@@ -129,9 +128,9 @@ async function sendTx(txObject) {
 // event watch
 sampleContract.events.Set()
 	.on("data", function (event) {
-			let data = event.returnValues;
-			console.log('watching "Set" event!');
-			console.log(data);
+		let data = event.returnValues;
+		console.log('watching "Set" event!');
+		console.log(data);
 	})
 	.on("error", console.error);
 
