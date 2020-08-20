@@ -1,6 +1,15 @@
 const Web3 = require("web3");
+
+/*
+// HttpProvider
 const rpcUrl = "https://ropsten.infura.io/v3/0235d2e3ae2b4919853b6383db54453a"; //The url which links you to the ethereum network - Ropsten in this case.
 const web3 = new Web3(new Web3.providers.HttpProvider(rpcUrl));
+*/
+
+// WebsocketProvider
+const rpcUrl = "wss://ropsten.infura.io/ws/v3/0235d2e3ae2b4919853b6383db54453a";
+const web3 = new Web3(new Web3.providers.WebsocketProvider(rpcUrl));
+
 const privateKey = "0x721e88bbeacab8286d96922f189199279ef68a0743220de1c075520f9ac28a18"; //Private Key to sign transactions with.
 const account = web3.eth.accounts.privateKeyToAccount(privateKey); //account associated with private key
 const fetch = require('node-fetch'); //To fetch APIs
@@ -8,7 +17,7 @@ const signedTxs = [];
 let nonce;
 
 //contract abi - the below is for the sample contract.
-const abi = [
+const abi =[
 	{
 		"constant": false,
 		"inputs": [
@@ -26,7 +35,7 @@ const abi = [
 	{
 		"constant": true,
 		"inputs": [],
-		"name": "getNumber",
+		"name": "number",
 		"outputs": [
 			{
 				"name": "",
@@ -40,7 +49,7 @@ const abi = [
 	{
 		"constant": true,
 		"inputs": [],
-		"name": "number",
+		"name": "getNumber",
 		"outputs": [
 			{
 				"name": "",
@@ -50,12 +59,29 @@ const abi = [
 		"payable": false,
 		"stateMutability": "view",
 		"type": "function"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"name": "from",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"name": "number",
+				"type": "uint256"
+			}
+		],
+		"name": "Set",
+		"type": "event"
 	}
-];
+]
 
-const contractAddress = "0x7147B5b40dE493c024CE9c327832e0cFc2f67D4B";
+const contractAddress = "0x2d70C16B9249AE8755740E2364D599b3BE6aaF36";
+// const contractAddress = "0x3F1acf630259fAb365c61bbF8eA3390d6B1b45a8";
 const sampleContract = new web3.eth.Contract(abi, contractAddress);
-
 
 //Example Oracle sets number from the api below - gas price on mainnet.
 async function main() {
@@ -99,5 +125,14 @@ async function sendTx(txObject) {
 	//send transaction
   web3.eth.sendSignedTransaction(signedTx.rawTransaction, {from:account});
 }
+
+// event watch
+sampleContract.events.Set()
+	.on("data", function (event) {
+			let data = event.returnValues;
+			console.log('watching "Set" event!');
+			console.log(data);
+	})
+	.on("error", console.error);
 
 main();
