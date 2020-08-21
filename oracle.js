@@ -79,8 +79,7 @@ const abi =[
 	}
 ]
 
-const contractAddress = "0x2d70C16B9249AE8755740E2364D599b3BE6aaF36";
-// const contractAddress = "0x3F1acf630259fAb365c61bbF8eA3390d6B1b45a8";
+const contractAddress = "0x36ae3dE15055eb57beee72FF35e567708786B74f";
 const sampleContract = new web3.eth.Contract(abi, contractAddress);
 
 // Example Oracle sets number from the api below - gas price on mainnet.
@@ -104,7 +103,7 @@ async function sendTx(txObject) {
   const txFrom = account.address;
   const txKey = account.privateKey;
   const gasPrice = (5*(10**9)); // 5 gwei gas price
-  const gasLimit = await txObject.estimateGas(); // estimated gas cost of trnsaction
+  const gasLimit = await txObject.estimateGas(); // estimated gas cost of transaction
 
   const tx = {
     from : txFrom,
