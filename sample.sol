@@ -8,6 +8,10 @@ contract Sample {
     /*event*/
     event Set(address from, uint number);
 
+    function setEventNumber(uint _number) public {
+        number = _number;
+    }
+
     /*function setting number to user input*/
     function setNumber(uint _number) public {
         number = _number;

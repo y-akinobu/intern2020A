@@ -84,8 +84,7 @@ const abi = [
 	}
 ]
 
-// const contractAddress = "0x36ae3dE15055eb57beee72FF35e567708786B74f";
-const contractAddress = "0xde613e814622Bb20799e1d60C1bf77a7b956f733";
+const contractAddress = "0xA0DC23532B5534349F43eCE1E5D35c4d26F14677";
 const sampleContract = new web3.eth.Contract(abi, contractAddress);
 
 // function sending the transaction from our configured wallet (the private key we provided)
@@ -122,7 +121,7 @@ sampleContract.events.Set()
 		let data = event.returnValues;
 		console.log('watching "Set" event!');
 		console.log(data);
-		sendTx(sampleContract.methods.setEventNumber("950"));
+		sendTx(sampleContract.methods.setEventNumber(950));
 		console.log("@debug: fin!");
 	})
 	.on("error", console.error);
