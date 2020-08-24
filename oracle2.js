@@ -5,9 +5,8 @@ const privateKey = "0x721e88bbeacab8286d96922f189199279ef68a0743220de1c075520f9a
 const account = web3.eth.accounts.privateKeyToAccount(privateKey); // account associated with private key
 const fetch = require('node-fetch'); //To fetch APIs
 const signedTxs = [];
-let nonce;
+// let nonce;
 
-// contract abi - the below is for the sample contract.
 const abi = [
 	{
 		"constant": false,
@@ -87,24 +86,30 @@ const abi = [
 const contractAddress = "0xA0DC23532B5534349F43eCE1E5D35c4d26F14677";
 const sampleContract = new web3.eth.Contract(abi, contractAddress);
 
-// Example Oracle sets number from the api below - gas price on mainnet.
+// Example Oracle sets number
 async function main() {
   let gasReq = await fetch('https://ethgasstation.info/json/ethgasAPI.json');
   let gasInfo = await gasReq.json();
 	let gasAvg = await (gasInfo.average);
 	
 	// sets input for setNumber function as gasAvg.
-	// Makes this into an object of the sendTx function (below) and triggers that function.
-  await sendTx(sampleContract.methods.setEventNumber(gasAvg));
+	await sendTx(sampleContract.methods.setEventNumber(gasAvg));
+	
+	sampleContract.methods.getNumber().call({from: account.address}, function (err, res) {
+		console.log('@@ getNumber');
+		console.log(`@@ err: ${err}`);
+		console.log(`@@ res: ${res}`)
+
+	});
 
 	// print average gas price in console
-	console.log("Avg gas price",gasAvg);
+	console.log("Avg gas price", gasAvg);
 }
 
-// function sending the transaction from our configured wallet (the private key we provided)
+// function sending the transaction
 async function sendTx(txObject) {
   const txTo = contractAddress;
-  const txData = txObject.encodeABI(); // txObject was set in main funtion
+  const txData = txObject.encodeABI();
   const txFrom = account.address;
   const txKey = account.privateKey;
   const gasPrice = (5*(10**9)); // 5 gwei gas price
@@ -113,33 +118,35 @@ async function sendTx(txObject) {
   const tx = {
     from : txFrom,
     to : txTo,
-    nonce : nonce,
+    // nonce : nonce,
     data : txData,
     gas : gasLimit, gasPrice
   };
 
   // sign the transaction
   const signedTx = await web3.eth.accounts.signTransaction(tx, txKey);
-  nonce++;
+  // nonce++;
 
-  // push transaction - dont wait for confirmations just wait till broadcasted
+  // push transaction
   signedTxs.push(signedTx.rawTransaction)
 
 	// send transaction
-  web3.eth.sendSignedTransaction(signedTx.rawTransaction, {from:account});
+	web3.eth.sendSignedTransaction(signedTx.rawTransaction, {from: account})
+	.on('receipt', function(receipt) {
+		console.log('@@ receipt:');
+		console.dir(receipt);
+	})
+	.on('error', console.error);
 }
 
 // event watch
-sampleContract.events.Set()
-	.on("data", function (event) {
-		let data = event.returnValues;
-		console.log('watching "Set" event!');
-		console.log(data);
-		main();
-	})
-	.on("error", console.error);
-
-/* 
-インターン課題:
-コントラクトのeventを監視するようにして、 eventの発火に伴って現実の世界の情報を取得してトランザクションを生成するようにする
-*/
+sampleContract.events.Set({}, function(err, event) {
+	console.log(`@@err: ${err}`);
+	console.log('@@ event:');
+	console.dir(event);
+}).on("data", function (event) {
+	let data = event.returnValues;
+	console.log('--- watching "Set" event! ---');
+	console.log(data);
+	main();
+}).on("error", console.error);
