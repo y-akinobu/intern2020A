@@ -5,7 +5,6 @@ const privateKey = "0x721e88bbeacab8286d96922f189199279ef68a0743220de1c075520f9a
 const account = web3.eth.accounts.privateKeyToAccount(privateKey); // account associated with private key
 const fetch = require('node-fetch'); //To fetch APIs
 const signedTxs = [];
-// let nonce;
 
 const abi = [
 	{
@@ -83,54 +82,50 @@ const abi = [
 	}
 ]
 
+/* Contract */
 const contractAddress = "0xA0DC23532B5534349F43eCE1E5D35c4d26F14677";
 const sampleContract = new web3.eth.Contract(abi, contractAddress);
 
-// Example Oracle sets number
+/* OpenWeatherMap API */
+const API_key = "1bce01f3b4289f87ba2ccc2682742bc6";
+const location = "Tokyo,jp"
+const OpenWeatherMap = "https://api.openweathermap.org/data/2.5/weather?q=" + location + "&units=metric&appid=" + API_key;
+
 async function main() {
-  let gasReq = await fetch('https://ethgasstation.info/json/ethgasAPI.json');
-  let gasInfo = await gasReq.json();
-	let gasAvg = await (gasInfo.average);
-	
-	// sets input for setNumber function as gasAvg.
-	await sendTx(sampleContract.methods.setEventNumber(gasAvg));
+	let weatherReq = await fetch(OpenWeatherMap);
+	let weatherInfo = await weatherReq.json();
+	let temperature = await (weatherInfo.main.temp);
+
+	await sendTx(sampleContract.methods.setEventNumber(123));
 	
 	sampleContract.methods.getNumber().call({from: account.address}, function (err, res) {
 		console.log('@@ getNumber');
 		console.log(`@@ err: ${err}`);
 		console.log(`@@ res: ${res}`)
-
 	});
 
-	// print average gas price in console
-	console.log("Avg gas price", gasAvg);
+	console.log("@@ temperature: ", temperature);
 }
 
-// function sending the transaction
 async function sendTx(txObject) {
   const txTo = contractAddress;
   const txData = txObject.encodeABI();
   const txFrom = account.address;
   const txKey = account.privateKey;
-  const gasPrice = (5*(10**9)); // 5 gwei gas price
-  const gasLimit = await txObject.estimateGas(); // estimated gas cost of transaction
-
+	const gasPrice = (5*(10**9));
+	const gasLimit = await txObject.estimateGas();
+	
   const tx = {
     from : txFrom,
     to : txTo,
-    // nonce : nonce,
     data : txData,
     gas : gasLimit, gasPrice
   };
 
-  // sign the transaction
-  const signedTx = await web3.eth.accounts.signTransaction(tx, txKey);
-  // nonce++;
-
-  // push transaction
+	const signedTx = await web3.eth.accounts.signTransaction(tx, txKey);
+	
   signedTxs.push(signedTx.rawTransaction)
 
-	// send transaction
 	web3.eth.sendSignedTransaction(signedTx.rawTransaction, {from: account})
 	.on('receipt', function(receipt) {
 		console.log('@@ receipt:');
@@ -139,7 +134,6 @@ async function sendTx(txObject) {
 	.on('error', console.error);
 }
 
-// event watch
 sampleContract.events.Set({}, function(err, event) {
 	console.log(`@@ err: ${err}`);
 	console.log('@@ event:');
@@ -148,5 +142,7 @@ sampleContract.events.Set({}, function(err, event) {
 	let data = event.returnValues;
 	console.log('--- watching "Set" event! ---');
 	console.log(data);
-	main();
+	// main();
 }).on("error", console.error);
+
+main();
