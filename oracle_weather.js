@@ -86,7 +86,7 @@ const abi = [
 const contractAddress = "0xA0DC23532B5534349F43eCE1E5D35c4d26F14677";
 const sampleContract = new web3.eth.Contract(abi, contractAddress);
 
-/* OpenWeatherMap API */
+/* OpenWeatherMap API (https://openweathermap.org/) */
 const API_key = "1bce01f3b4289f87ba2ccc2682742bc6";
 const location = "Tokyo,jp"
 const OpenWeatherMap = "https://api.openweathermap.org/data/2.5/weather?q=" + location + "&units=metric&appid=" + API_key;
@@ -95,16 +95,27 @@ async function main() {
 	let weatherReq = await fetch(OpenWeatherMap);
 	let weatherInfo = await weatherReq.json();
 	let temperature = await (weatherInfo.main.temp);
-
-	await sendTx(sampleContract.methods.setEventNumber(123));
 	
+	/*
 	sampleContract.methods.getNumber().call({from: account.address}, function (err, res) {
 		console.log('@@ getNumber');
 		console.log(`@@ err: ${err}`);
 		console.log(`@@ res: ${res}`)
 	});
+	*/
 
 	console.log("@@ temperature: ", temperature);
+	// await sendTx(sampleContract.methods.setEventNumber(parseInt(temperature)));
+
+	if (parseFloat(temperature) >= 35.0) {
+		console.log('Caution!!!!!');
+		await sendTx(sampleContract.methods.setEventNumber(parseInt(temperature)));
+	} else if (parseFloat(temperature) >= 30.0) {
+		console.log('Notice!!');
+		await sendTx(sampleContract.methods.setEventNumber(parseInt(temperature)));
+	} else {
+		console.log('Safety');
+	}
 }
 
 async function sendTx(txObject) {
@@ -142,7 +153,7 @@ sampleContract.events.Set({}, function(err, event) {
 	let data = event.returnValues;
 	console.log('--- watching "Set" event! ---');
 	console.log(data);
-	// main();
+	main();
 }).on("error", console.error);
 
-main();
+// main();
