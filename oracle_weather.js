@@ -1,3 +1,5 @@
+/* OpenWeatherMap API */
+
 const Web3 = require("web3");
 const rpcUrl = "wss://ropsten.infura.io/ws/v3/0235d2e3ae2b4919853b6383db54453a";
 const web3 = new Web3(new Web3.providers.WebsocketProvider(rpcUrl));

@@ -1,3 +1,5 @@
+/* kskhasegawa/intern2020A/oracle.js */
+
 const Web3 = require("web3");
 
 /*
